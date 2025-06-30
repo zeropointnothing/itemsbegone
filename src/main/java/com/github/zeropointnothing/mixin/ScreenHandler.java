@@ -53,9 +53,9 @@ public abstract class ScreenHandler {
             ItemsBegone.LOGGER.info("Player '{}' attempted to interact (after) with blacklisted item ({})!", player.getName(), cursorStack.getName());
             player.currentScreenHandler.setCursorStack(ItemStack.EMPTY);
             if (!ConfigLoader.CONFIG.delete_on_deny) {
-                player.currentScreenHandler.getSlot(slotIndex).insertStack(cursorStack);
+//                player.currentScreenHandler.getSlot(slotIndex).insertStack(cursorStack);
+                ci.cancel();
             }
-            ci.cancel();
         }
     }
 }
