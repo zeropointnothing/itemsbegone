@@ -27,7 +27,7 @@ public class ItemsBegone implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	static boolean isBlacklisted(ItemStack stack, String team_name) {
+	public static Boolean isBlacklisted(ItemStack stack, String team_name) {
 		Identifier id = Registries.ITEM.getId(stack.getItem());
 
 		return ConfigLoader.CONFIG.blacklist.getTeam(team_name).namespace_blacklist.contains(id.getNamespace())
@@ -35,13 +35,20 @@ public class ItemsBegone implements ModInitializer {
 				|| ConfigLoader.CONFIG.blacklist.getTeam("global").namespace_blacklist.contains(id.getNamespace())
 				|| ConfigLoader.CONFIG.blacklist.getTeam("global").item_blacklist.contains(id.toString());
 	}
-	private static ActionResult checkActiveHand(PlayerEntity player, World world, Hand hand) {
+
+	public static String getTeam(PlayerEntity player) {
 		String team;
 		try {
 			team = Objects.requireNonNull(player.getScoreboardTeam()).getName();
 		} catch (NullPointerException e) { // Player isn't on a team
 			team = "global";
 		}
+
+		return team;
+	}
+
+	private static ActionResult checkActiveHand(PlayerEntity player, World world, Hand hand) {
+		String team = getTeam(player);
 
 		try {
 			ItemStack holding = player.getStackInHand(hand);
@@ -72,13 +79,8 @@ public class ItemsBegone implements ModInitializer {
 		}
 	}
 	public static void checkInventory(PlayerEntity player) {
-		String team;
+		String team = getTeam(player);
 		ItemStack detected = null;
-		try {
-			team = Objects.requireNonNull(player.getScoreboardTeam()).getName();
-		} catch (NullPointerException e) { // Player isn't on a team
-			team = "global";
-		}
 
 		for (int i=0; i<player.getInventory().size(); i++) {
 			ItemStack stack = player.getInventory().getStack(i);
