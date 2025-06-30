@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "itemsbegone",
-	"version": "${version}",
+	"version": "${version}-1.21.1",
 	"name": "Items, Be Gone!",
 	"description": "A ID/team-based blacklist mod designed for ease of use while being plenty powerful!",
 	"authors": [
