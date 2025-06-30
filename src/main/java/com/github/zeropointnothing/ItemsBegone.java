@@ -2,10 +2,12 @@ package com.github.zeropointnothing;
 
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -18,6 +20,7 @@ import java.util.*;
 
 public class ItemsBegone implements ModInitializer {
 	public static final String MOD_ID = "mod-blacklist";
+	private static int tickCounter = 0;
 
 	// This logger is used to write text to the console and the log file.
 	// It is considered best practice to use your mod id as the logger's name.
@@ -32,7 +35,7 @@ public class ItemsBegone implements ModInitializer {
 				|| ConfigLoader.CONFIG.blacklist.getTeam("global").namespace_blacklist.contains(id.getNamespace())
 				|| ConfigLoader.CONFIG.blacklist.getTeam("global").item_blacklist.contains(id.toString());
 	}
-	private static ActionResult eventCallback(PlayerEntity player, World world, Hand hand) {
+	private static ActionResult checkActiveHand(PlayerEntity player, World world, Hand hand) {
 		String team;
 		try {
 			team = Objects.requireNonNull(player.getScoreboardTeam()).getName();
@@ -44,7 +47,7 @@ public class ItemsBegone implements ModInitializer {
 			ItemStack holding = player.getStackInHand(hand);
 			boolean blacklisted = isBlacklisted(holding, team);
 			if (blacklisted) {
-				LOGGER.info("Player '{}' attempted to use blacklisted item ({})!", player.getName().toString(), holding);
+				LOGGER.info("Player '{}' attempted to use blacklisted item ({})!", player.getName(), holding);
 				// While we're here, drop every item that isn't blacklisted.
 				for (int i = 0; i < player.getInventory().size(); i++) {
 					ItemStack stack = player.getInventory().getStack(i);
@@ -68,15 +71,41 @@ public class ItemsBegone implements ModInitializer {
 			throw new RuntimeException("An error occurred while checking the blacklist! Your config is likely misconfigured! Original error: ", e);
 		}
 	}
+	public static void checkInventory(PlayerEntity player) {
+		String team;
+		ItemStack detected = null;
+		try {
+			team = Objects.requireNonNull(player.getScoreboardTeam()).getName();
+		} catch (NullPointerException e) { // Player isn't on a team
+			team = "global";
+		}
 
-	private static TypedActionResult<ItemStack> teventCallback(PlayerEntity player, World world, Hand hand) {
-		ActionResult result = eventCallback(player, world, hand);
+		for (int i=0; i<player.getInventory().size(); i++) {
+			ItemStack stack = player.getInventory().getStack(i);
+			if (isBlacklisted(stack, team)) {
+				if (detected == null) {
+					detected = stack;
+				}
+				if (!ConfigLoader.CONFIG.delete_on_deny) {
+					player.dropStack(stack.copy());
+				}
+				player.getInventory().setStack(i, ItemStack.EMPTY);
+			}
+		}
+
+		if (detected != null) {
+			LOGGER.info("Player '{}' attempted to pick up blacklisted item ({})!", player.getName(), detected);
+		}
+	}
+
+	private static TypedActionResult<ItemStack> typed_checkEventCallback(PlayerEntity player, World world, Hand hand) {
+		ActionResult result = checkActiveHand(player, world, hand);
 		if (result == ActionResult.PASS) {
 			return TypedActionResult.pass(player.getStackInHand(hand));
 		} else if (result == ActionResult.FAIL) {
 			return TypedActionResult.fail(player.getStackInHand(hand));
 		}
-		throw new RuntimeException("Unhandled result for teventCallback! Inform the developer of this problem!");
+		throw new RuntimeException("Unhandled result for typed_checkEventCallback! Inform the developer of this problem!");
 	}
 
 	@Override
@@ -89,10 +118,23 @@ public class ItemsBegone implements ModInitializer {
 			LOGGER.info("{} // ITEM: {}", team.name, team.item_blacklist);
 		}
 
-		UseBlockCallback.EVENT.register((a1,a2,a3,a4) -> eventCallback(a1,a2,a3));
-		AttackBlockCallback.EVENT.register((a1,a2,a3,a4,a5) -> eventCallback(a1,a2,a3));
-		UseEntityCallback.EVENT.register((a1,a2,a3,a4,a5) -> eventCallback(a1,a2,a3));
-		AttackEntityCallback.EVENT.register((a1,a2,a3,a4,a5) -> eventCallback(a1,a2,a3));
-		UseItemCallback.EVENT.register(ItemsBegone::teventCallback);
+		UseBlockCallback.EVENT.register((a1,a2,a3,a4) -> checkActiveHand(a1,a2,a3));
+		AttackBlockCallback.EVENT.register((a1,a2,a3,a4,a5) -> checkActiveHand(a1,a2,a3));
+		UseEntityCallback.EVENT.register((a1,a2,a3,a4,a5) -> checkActiveHand(a1,a2,a3));
+		AttackEntityCallback.EVENT.register((a1,a2,a3,a4,a5) -> checkActiveHand(a1,a2,a3));
+		UseItemCallback.EVENT.register(ItemsBegone::typed_checkEventCallback);
+
+
+
+//		ServerTickEvents.END_SERVER_TICK.register((server) -> {
+//			if (++tickCounter % 40 != 0) return; // every ~2 seconds (20 ticks/sec)
+//
+//			for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+////				Hand hand = player.getActiveHand();
+////				World world = player.getWorld();
+//
+//				checkInventory(player);
+//			}
+//		});
 	}
 }
