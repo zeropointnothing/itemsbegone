@@ -29,22 +29,21 @@ public class Config {
 //            throw new RuntimeException("No such team with name " + name + "!");
         }
 
-        public void addTeam(String name, List<String> blacklist_namespace, List<String> blacklist_item) {
-            TeamConfig new_team = new TeamConfig(name, blacklist_namespace, blacklist_item);
+        public void addTeam(String name, List<String> blacklist_namespace, List<String> blacklist_item, Boolean enabled) {
+            TeamConfig new_team = new TeamConfig(name, blacklist_namespace, blacklist_item, enabled);
             teams.add(new_team);
         }
     }
 
     public static class TeamConfig {
         public String name;
+        public Boolean enabled;
         public List<String> namespace_blacklist;
         public List<String> item_blacklist;
 
-        public TeamConfig(String name, List<String> namespace_blacklist, List<String> item_blacklist) {
+        public TeamConfig(String name, List<String> namespace_blacklist, List<String> item_blacklist, Boolean enabled) {
             if (
-                    name == null
-                    || namespace_blacklist == null
-                    || item_blacklist == null
+                    name == null || enabled == null || namespace_blacklist == null || item_blacklist == null
             ) {
                 throw new IllegalArgumentException("TeamConfig can not be initialized with null values!");
             }
