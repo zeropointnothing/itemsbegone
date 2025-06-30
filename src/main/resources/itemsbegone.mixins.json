@@ -3,7 +3,9 @@
 	"package": "com.github.zeropointnothing.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"PlayerInventory"
+		"PlayerInventory",
+		"Slot",
+		"ScreenHandler"
 	],
 	"injectors": {
 		"defaultRequire": 1
