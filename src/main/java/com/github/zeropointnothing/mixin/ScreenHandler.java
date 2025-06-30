@@ -4,21 +4,14 @@ import com.github.zeropointnothing.ConfigLoader;
 import com.github.zeropointnothing.ItemsBegone;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandlerListener;
 import net.minecraft.screen.slot.SlotActionType;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
-
 @Mixin(net.minecraft.screen.ScreenHandler.class)
 public abstract class ScreenHandler {
-    @Shadow @Final private List<ScreenHandlerListener> listeners;
-
     // TAIL event fires AFTER player clicks, allowing us to monitor PICK UP events
     // to be more specific, it utilizes the fact that the item is in the user's cursor at this point
     @Inject(method = "onSlotClick", at = @At("TAIL"), cancellable = true)
