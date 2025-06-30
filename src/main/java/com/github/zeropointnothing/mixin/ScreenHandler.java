@@ -19,11 +19,12 @@ public abstract class ScreenHandler {
         String team = ItemsBegone.getTeam(player);
 
         ItemStack cursorStack = player.currentScreenHandler.getCursorStack();
-        ItemsBegone.LOGGER.info("onSlotClick fired. {}", cursorStack.toString());
+//        ItemsBegone.LOGGER.info("onSlotClick fired. {}", cursorStack.toString());
 
         boolean blacklist = ItemsBegone.isBlacklisted(cursorStack, team);
 
         if (blacklist) {
+            ItemsBegone.LOGGER.info("Player '{}' attempted to interact (before) with blacklisted item ({})!", player.getName(), cursorStack.getName());
             player.currentScreenHandler.setCursorStack(ItemStack.EMPTY);
             if (!ConfigLoader.CONFIG.delete_on_deny) {
                 player.currentScreenHandler.getSlot(slotIndex).insertStack(cursorStack);
@@ -44,11 +45,12 @@ public abstract class ScreenHandler {
         } catch (IndexOutOfBoundsException e) {
             return;
         }
-        ItemsBegone.LOGGER.info("onSlotClick (after) fired. {}", cursorStack.toString());
+//        ItemsBegone.LOGGER.info("onSlotClick (after) fired. {}", cursorStack.toString());
 
         boolean blacklist = ItemsBegone.isBlacklisted(cursorStack, team);
 
         if (blacklist) {
+            ItemsBegone.LOGGER.info("Player '{}' attempted to interact (after) with blacklisted item ({})!", player.getName(), cursorStack.getName());
             player.currentScreenHandler.setCursorStack(ItemStack.EMPTY);
             if (!ConfigLoader.CONFIG.delete_on_deny) {
                 player.currentScreenHandler.getSlot(slotIndex).insertStack(cursorStack);
