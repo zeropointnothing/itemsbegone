@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public class ItemsBegone implements ModInitializer {
-	public static final String MOD_ID = "mod-blacklist";
+	public static final String MOD_ID = "items-begone";
 	// This logger is used to write text to the console and the log file.
 	// It is considered best practice to use your mod id as the logger's name.
 	// That way, it's clear which mod wrote info, warnings, and errors.
