@@ -26,11 +26,25 @@ public class ItemsBegone implements ModInitializer {
 	public static Boolean isBlacklisted(ItemStack stack, String team_name) {
 		Identifier id = Registries.ITEM.getId(stack.getItem());
 
-		return ConfigLoader.CONFIG.blacklist.getTeam(team_name).enabled
-				&& (ConfigLoader.CONFIG.blacklist.getTeam(team_name).namespace_blacklist.contains(id.getNamespace())
-				|| ConfigLoader.CONFIG.blacklist.getTeam(team_name).item_blacklist.contains(id.toString())
-				|| ConfigLoader.CONFIG.blacklist.getTeam("global").namespace_blacklist.contains(id.getNamespace())
-				|| ConfigLoader.CONFIG.blacklist.getTeam("global").item_blacklist.contains(id.toString()));
+		boolean isBlacklistedTeam = ConfigLoader.CONFIG.blacklist.getTeam(team_name).enabled &&
+				(
+						ConfigLoader.CONFIG.blacklist.getTeam(team_name).namespace_blacklist.contains(id.getNamespace())
+								|| ConfigLoader.CONFIG.blacklist.getTeam(team_name).item_blacklist.contains(id.toString())
+				);
+		boolean isBlacklistedGlobal = ConfigLoader.CONFIG.blacklist.getTeam("global").enabled &&
+				(
+						ConfigLoader.CONFIG.blacklist.getTeam("global").item_blacklist.contains(id.toString())
+								|| ConfigLoader.CONFIG.blacklist.getTeam(team_name).item_blacklist.contains(id.getNamespace())
+				);
+
+		return isBlacklistedGlobal || isBlacklistedTeam;
+	}
+
+	public static Boolean isBlacklistedNamespace(String namespace, String team_name) {
+		boolean isBlacklistedTeam = ConfigLoader.CONFIG.blacklist.getTeam(team_name).namespace_blacklist.contains(namespace);
+		boolean isBlacklistedGlobal = ConfigLoader.CONFIG.blacklist.getTeam("global").item_blacklist.contains(namespace);
+
+		return isBlacklistedGlobal || isBlacklistedTeam;
 	}
 
 	public static String getTeam(PlayerEntity player) {
