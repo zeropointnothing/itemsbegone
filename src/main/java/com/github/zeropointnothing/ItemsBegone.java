@@ -123,6 +123,7 @@ public class ItemsBegone implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		Commands.register();
 		ConfigLoader.loadConfig();
 		LOGGER.info("Hello Fabric world!");
 		LOGGER.info("Initialized Config with team values set to:");
