@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ScreenHandler {
     // TAIL event fires AFTER player clicks, allowing us to monitor PICK UP events
     // to be more specific, it utilizes the fact that the item is in the user's cursor at this point
-    @Inject(method = "onSlotClick", at = @At("TAIL"), cancellable = true)
+    @Inject(method = "onSlotClick", at = @At("TAIL"))
     private void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
         String team = ItemsBegone.getTeam(player);
 
@@ -29,7 +29,6 @@ public abstract class ScreenHandler {
             if (!ConfigLoader.CONFIG.delete_on_deny) {
                 player.currentScreenHandler.getSlot(slotIndex).insertStack(cursorStack);
             }
-            ci.cancel();
         }
     }
 
@@ -53,7 +52,7 @@ public abstract class ScreenHandler {
             ItemsBegone.LOGGER.info("Player '{}' attempted to interact (after) with blacklisted item ({})!", player.getName(), cursorStack.getName());
             player.currentScreenHandler.setCursorStack(ItemStack.EMPTY);
             if (!ConfigLoader.CONFIG.delete_on_deny) {
-//                player.currentScreenHandler.getSlot(slotIndex).insertStack(cursorStack);
+                player.currentScreenHandler.getSlot(slotIndex).insertStack(cursorStack);
                 ci.cancel();
             }
         }
