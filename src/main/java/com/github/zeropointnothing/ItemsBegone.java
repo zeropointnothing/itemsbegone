@@ -26,10 +26,25 @@ public class ItemsBegone implements ModInitializer {
 	public static Boolean isBlacklisted(ItemStack stack, String team_name) {
 		Identifier id = Registries.ITEM.getId(stack.getItem());
 
-		return ConfigLoader.CONFIG.blacklist.getTeam(team_name).namespace_blacklist.contains(id.getNamespace())
-				|| ConfigLoader.CONFIG.blacklist.getTeam(team_name).item_blacklist.contains(id.toString())
-				|| ConfigLoader.CONFIG.blacklist.getTeam("global").namespace_blacklist.contains(id.getNamespace())
-				|| ConfigLoader.CONFIG.blacklist.getTeam("global").item_blacklist.contains(id.toString());
+		boolean isBlacklistedTeam = ConfigLoader.CONFIG.blacklist.getTeam(team_name).enabled &&
+				(
+						ConfigLoader.CONFIG.blacklist.getTeam(team_name).namespace_blacklist.contains(id.getNamespace())
+								|| ConfigLoader.CONFIG.blacklist.getTeam(team_name).item_blacklist.contains(id.toString())
+				);
+		boolean isBlacklistedGlobal = ConfigLoader.CONFIG.blacklist.getTeam("global").enabled &&
+				(
+						ConfigLoader.CONFIG.blacklist.getTeam("global").item_blacklist.contains(id.toString())
+								|| ConfigLoader.CONFIG.blacklist.getTeam(team_name).item_blacklist.contains(id.getNamespace())
+				);
+
+		return isBlacklistedGlobal || isBlacklistedTeam;
+	}
+
+	public static Boolean isBlacklistedNamespace(String namespace, String team_name) {
+		boolean isBlacklistedTeam = ConfigLoader.CONFIG.blacklist.getTeam(team_name).namespace_blacklist.contains(namespace);
+		boolean isBlacklistedGlobal = ConfigLoader.CONFIG.blacklist.getTeam("global").item_blacklist.contains(namespace);
+
+		return isBlacklistedGlobal || isBlacklistedTeam;
 	}
 
 	public static String getTeam(PlayerEntity player) {
@@ -108,12 +123,14 @@ public class ItemsBegone implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		Commands.register();
 		ConfigLoader.loadConfig();
 		LOGGER.info("Hello Fabric world!");
 		LOGGER.info("Initialized Config with team values set to:");
 		for (Config.TeamConfig team : ConfigLoader.CONFIG.blacklist.teams) {
-			LOGGER.info("{} // NAMESPACE: {}", team.name, team.namespace_blacklist);
-			LOGGER.info("{} // ITEM: {}", team.name, team.item_blacklist);
+			LOGGER.info("// {} // ({})", team.name, team.enabled ? "enabled" : "disabled");
+			LOGGER.info("// NAMESPACE: {}", team.namespace_blacklist);
+			LOGGER.info("// ITEM: {}", team.item_blacklist);
 		}
 
 		UseBlockCallback.EVENT.register((a1,a2,a3,a4) -> checkActiveHand(a1,a2,a3));

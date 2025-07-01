@@ -23,7 +23,7 @@ public class ConfigLoader {
                 CONFIG = new Config(new Config.TeamList(new ArrayList<>()), false);
 
                 // set default teams
-                CONFIG.blacklist.addTeam("global", new ArrayList<>(), new ArrayList<>());
+                CONFIG.blacklist.addTeam("global", new ArrayList<>(), new ArrayList<>(), true);
                 //
                 saveConfig();
                 return;
@@ -47,6 +47,7 @@ public class ConfigLoader {
                     Config.TeamConfig team = CONFIG.blacklist.teams.get(i);
                     if (
                             team.item_blacklist == null
+                            || team.enabled == null
                             || team.namespace_blacklist == null
                             || team.name == null
                     ) {
