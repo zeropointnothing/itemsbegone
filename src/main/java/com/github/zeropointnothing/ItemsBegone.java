@@ -34,7 +34,7 @@ public class ItemsBegone implements ModInitializer {
 		boolean isBlacklistedGlobal = ConfigLoader.CONFIG.blacklist.getTeam("global").enabled &&
 				(
 						ConfigLoader.CONFIG.blacklist.getTeam("global").item_blacklist.contains(id.toString())
-								|| ConfigLoader.CONFIG.blacklist.getTeam(team_name).item_blacklist.contains(id.getNamespace())
+								|| ConfigLoader.CONFIG.blacklist.getTeam("global").namespace_blacklist.contains(id.getNamespace())
 				);
 
 		return isBlacklistedGlobal || isBlacklistedTeam;
