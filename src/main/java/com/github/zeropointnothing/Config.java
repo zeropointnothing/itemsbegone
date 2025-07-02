@@ -48,6 +48,7 @@ public class Config {
                 throw new IllegalArgumentException("TeamConfig can not be initialized with null values!");
             }
             this.name = name;
+            this.enabled = enabled;
             this.namespace_blacklist = namespace_blacklist;
             this.item_blacklist = item_blacklist;
         }
