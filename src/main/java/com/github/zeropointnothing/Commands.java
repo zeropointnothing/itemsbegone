@@ -137,7 +137,8 @@ public class Commands {
         if ((!Objects.equals(subList.get(0), name))) {
             for (int i = subList.size() - 1; i >= 0; i--) {
                 LiteralArgumentBuilder<ServerCommandSource> branch = CommandManager.literal(subList.get(i));
-                branch.then(finalBranch);
+                // messy, but ensures that all levels of the command are locked behind a wall
+                branch.requires(source -> source.hasPermissionLevel(permissionLevel)).then(finalBranch);
                 finalBranch = branch;
             }
         }
